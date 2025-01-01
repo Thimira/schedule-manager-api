@@ -4,7 +4,7 @@
 
 ## Description
 
-A scheduling and task management API using [Nest](https://github.com/nestjs/nest) framework.
+A scheduling and task management API using [NestJS](https://github.com/nestjs/nest) framework and ProstgeSQL for data storage with Prisma ORM.
 
 ## Project setup
 
@@ -81,6 +81,9 @@ $ npm run start
 ```bash
 # unit tests
 $ npm run test
+
+# test coverage
+$ npm run test:cov
 ```
 
 
