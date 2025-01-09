@@ -63,14 +63,67 @@ describe('TasksService', () => {
     });
   });
 
-  it('should return all tasks', async () => {
-    const mockTasks = [
-      { id: 'mock-task-id', accountId: 1, scheduleId: 'mock-schedule-id', startTime: new Date(), duration: 60, type: 'work' },
-    ];
-    mockPrismaService.task.findMany.mockResolvedValue(mockTasks);
+  describe('findAll', () => {
+    it('should return all tasks', async () => {
+      const mockTasks = [
+        { id: 'mock-task-id', accountId: 1, scheduleId: 'mock-schedule-id', startTime: new Date(), duration: 60, type: 'work' },
+      ];
+      mockPrismaService.task.findMany.mockResolvedValue(mockTasks);
 
-    const result = await service.findAll();
-    expect(result).toEqual(mockTasks);
-    expect(mockPrismaService.task.findMany).toHaveBeenCalled();
+      const result = await service.findAll();
+      expect(result).toEqual(mockTasks);
+      expect(mockPrismaService.task.findMany).toHaveBeenCalled();
+    });
+  });
+
+  describe('findOne', () => {
+    it('should return a task by ID', async () => {
+      const mockTask = { 
+        id: 'mock-task-id', 
+        accountId: 1, 
+        scheduleId: 'mock-schedule-id', 
+        startTime: new Date(), 
+        duration: 60, 
+        type: 'work' 
+      };
+      mockPrismaService.task.findUnique.mockResolvedValue(mockTask);
+
+      const result = await service.findOne('mock-task-id');
+      expect(result).toEqual(mockTask);
+      expect(mockPrismaService.task.findUnique).toHaveBeenCalledWith({ where: { id: 'mock-task-id' } });
+    });
+
+    it('should throw NotFoundException if task is not found', async () => {
+      mockPrismaService.task.findUnique.mockResolvedValue(null);
+
+      await expect(service.findOne('non-existent-task-id')).rejects.toThrow(NotFoundException);
+      expect(mockPrismaService.task.findUnique).toHaveBeenCalledWith({ where: { id: 'non-existent-task-id' } });
+    });
+  });
+
+  describe('remove', () => {
+    it('should remove a task by ID', async () => {
+      const mockTask = { 
+        id: 'mock-task-id', 
+        accountId: 1, 
+        scheduleId: 'mock-schedule-id', 
+        startTime: new Date(), 
+        duration: 60, 
+        type: 'work'
+      };
+      mockPrismaService.task.findUnique.mockResolvedValue(mockTask);
+      mockPrismaService.task.delete.mockResolvedValue(mockTask);
+
+      const result = await service.remove('mock-task-id');
+      expect(result).toEqual(mockTask);
+      expect(mockPrismaService.task.delete).toHaveBeenCalledWith({ where: { id: 'mock-task-id' } });
+    });
+
+    it('should throw NotFoundException if task does not exist', async () => {
+      mockPrismaService.task.delete.mockRejectedValue(new NotFoundException(`Task with ID non-existent-task-id not found`));
+
+      await expect(service.remove('non-existent-task-id')).rejects.toThrow(NotFoundException);
+      expect(mockPrismaService.task.findUnique).toHaveBeenCalledWith({ where: { id: 'mock-task-id' } });
+    });
   });
 });
