@@ -1,11 +1,16 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class TasksService {
   constructor(private prisma: PrismaService) {}
 
-  create(data: any) {
+  async create(data: any) {
+    const scheduleId = data.scheduleId;
+    const schedule = await this.prisma.schedule.findUnique({ where: { scheduleId } });
+    if (!schedule) {
+      throw new NotFoundException(`Schedule must exist before adding tasks to it. Schedule with ID ${id} not found`);
+    }
     return this.prisma.task.create({ data });
   }
 
@@ -13,11 +18,26 @@ export class TasksService {
     return this.prisma.task.findMany();
   }
 
-  findOne(id: string) {
-    return this.prisma.task.findUnique({ where: { id } });
+  async findOne(id: string) {
+    const task = await this.prisma.task.findUnique({ where: { id } });
+    if (!task) {
+      throw new NotFoundException(`Task with ID ${id} not found`);
+    }
+    return task;
   }
 
-  update(id: string, data: any) {
+  async update(id: string, data: any) {
+    const task = await this.prisma.task.findUnique({ where: { id } });
+    if (!task) {
+      throw new NotFoundException(`Task with ID ${id} not found`);
+    }
+    if (data.scheduleId) {
+      const scheduleId = data.scheduleId;
+      const schedule = await this.prisma.schedule.findUnique({ where: { scheduleId } });
+      if (!schedule) {
+        throw new NotFoundException(`Schedule must exist before adding tasks to it. Schedule with ID ${id} not found`);
+      }
+    }
     return this.prisma.task.update({ where: { id }, data });
   }
 
