@@ -7,9 +7,9 @@ export class TasksService {
 
   async create(data: any) {
     const scheduleId = data.scheduleId;
-    const schedule = await this.prisma.schedule.findUnique({ where: { scheduleId } });
+    const schedule = await this.prisma.schedule.findUnique({ where: { id: scheduleId } });
     if (!schedule) {
-      throw new NotFoundException(`Schedule must exist before adding tasks to it. Schedule with ID ${id} not found`);
+      throw new NotFoundException(`Schedule must exist before adding tasks to it. Schedule with ID ${scheduleId} not found`);
     }
     return this.prisma.task.create({ data });
   }
@@ -33,9 +33,9 @@ export class TasksService {
     }
     if (data.scheduleId) {
       const scheduleId = data.scheduleId;
-      const schedule = await this.prisma.schedule.findUnique({ where: { scheduleId } });
+      const schedule = await this.prisma.schedule.findUnique({ where: { id: scheduleId } });
       if (!schedule) {
-        throw new NotFoundException(`Schedule must exist before adding tasks to it. Schedule with ID ${id} not found`);
+        throw new NotFoundException(`Schedule must exist before adding tasks to it. Schedule with ID ${scheduleId} not found`);
       }
     }
     return this.prisma.task.update({ where: { id }, data });
